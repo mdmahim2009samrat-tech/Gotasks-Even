@@ -1342,6 +1342,32 @@
 
     function saveUsersStore(list) {
       localStorage.setItem('mahim_users', JSON.stringify(list));
+      syncUsersToFirebase(list);
+    }
+
+    // ---------- FIREBASE SYNC (users) ----------
+    // localStorage প্রতিটা ডিভাইস/ব্রাউজারে আলাদা থাকে, তাই আগে "Top Refers" লিস্ট
+    // শুধু নিজের ডিভাইসেই দেখা যেত, অন্য কারো ডিভাইসে অন্যদের ডেটা দেখা যেত না।
+    // এখন প্রতিটা ইউজারের নাম ও referralCount Firebase Realtime Database-এ সেভ হয়,
+    // যাতে সব ইউজার মিলিয়ে একটাই শেয়ার্ড লিডারবোর্ড দেখানো যায়।
+    function syncUsersToFirebase(list) {
+      try {
+        if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
+        const updates = {};
+        (list || []).forEach(u => {
+          if (!u || !u.id) return;
+          updates['mahimUsers/' + u.id] = {
+            name: u.name || 'User',
+            referralCount: Number(u.referralCount || 0)
+          };
+        });
+        if (Object.keys(updates).length === 0) return;
+        firebase.database().ref().update(updates).catch(err => {
+          console.warn('Firebase leaderboard sync failed (check database rules)', err);
+        });
+      } catch (e) {
+        console.warn('Firebase leaderboard sync failed', e);
+      }
     }
 
     // পুরনো ভার্সনে সেভ হওয়া ডেটা (আলাদা key-তে) থাকলে হারিয়ে না যাওয়ার জন্য একবার মাইগ্রেট করে নেয়
@@ -1472,16 +1498,45 @@
     function renderLeaderboard() {
       const box = document.getElementById('leaderboardList');
       if (!box) return;
-      let users = [];
+
+      const renderFromLocal = () => {
+        let users = [];
+        try { users = getUsersStore(); } catch (e) { users = []; }
+        renderLeaderboardRows(users);
+      };
+
       try {
-        users = getUsersStore();
+        if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+          renderFromLocal();
+          return;
+        }
+        box.style.textAlign = 'center';
+        box.style.color = '#888';
+        box.textContent = 'লোড হচ্ছে...';
+        firebase.database().ref('mahimUsers').once('value').then(snapshot => {
+          const val = snapshot.val() || {};
+          const users = Object.keys(val).map(id => ({
+            id: id,
+            name: val[id] && val[id].name,
+            referralCount: val[id] && val[id].referralCount
+          }));
+          renderLeaderboardRows(users);
+        }).catch(err => {
+          console.warn('Leaderboard fetch from Firebase failed, showing local data', err);
+          renderFromLocal();
+        });
       } catch (e) {
-        users = [];
+        renderFromLocal();
       }
-      const top = users
+    }
+
+    function renderLeaderboardRows(users) {
+      const box = document.getElementById('leaderboardList');
+      if (!box) return;
+      const top = (users || [])
         .filter(u => Number(u.referralCount || 0) > 0)
         .sort((a, b) => Number(b.referralCount || 0) - Number(a.referralCount || 0))
-        .slice(0, 10);
+        .slice(0, 15);
 
       if (top.length === 0) {
         box.style.textAlign = 'center';
