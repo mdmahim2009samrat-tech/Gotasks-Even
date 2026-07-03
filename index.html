@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mahim Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --admin-bg: #f0f2f5;
+      --sidebar-bg: #1e1e2d;
+      --primary: #e52d87;
+      --primary-dark: #c0246e;
+      --card-bg: #ffffff;
+      --text: #2d2d2d;
+      --muted: #777;
+      --border: #e4e8ec;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+
+    body {
+      background: var(--admin-bg);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: #ccc;
+      padding: 25px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 10;
+      transition: 0.3s;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 8px;
+    }
+    .sidebar-logo i {
+      color: var(--primary);
+    }
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nav-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      color: #b0b0c0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
+      position: relative;
+    }
+    .nav-menu li a.active,
+    .nav-menu li a:hover {
+      background: rgba(229, 45, 135, 0.15);
+      color: white;
+      font-weight: 600;
+    }
+    .nav-menu li a i {
+      width: 20px;
+      font-size: 1.1rem;
+    }
+    .nav-badge {
+      position: absolute;
+      right: 12px;
+      background: var(--danger);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 20px 25px;
+      width: 100%;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .admin-badge {
+      background: var(--primary);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .section-header h3 {
+      font-size: 1.2rem;
+      color: #222;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #444;
+    }
+    .form-control {
+      padding: 12px 15px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      background: #fafbfc;
+      outline: none;
+      transition: 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      background: white;
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .btn {
+      padding: 11px 22px;
+      border-radius: 30px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(229,45,135,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    .btn-outline {
+      background: white;
+      border: 1.5px solid var(--border);
+      color: #444;
+    }
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .preview-box {
+      background: #f5f5f5;
+      border-radius: 16px;
+      padding: 15px;
+      text-align: center;
+      margin-top: 12px;
+    }
+    .preview-box img {
+      max-width: 120px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 24px;
+      transition: .3s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .3s;
+    }
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .link-list {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .link-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: #f9f9fb;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      gap: 10px;
+    }
+    .link-list li span {
+      flex: 1;
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .ad-slots-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .toast-admin {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #1e1e2d;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-weight: 500;
+      z-index: 999;
+      opacity: 0;
+      transition: 0.3s;
+    }
+    .toast-admin.show {
+      opacity: 1;
+    }
+
+    /* ---- Withdraw / Users section ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.04);
+      text-align: center;
+    }
+    .stat-box .num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-box .lbl {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #f1f1f4;
+      color: #555;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .req-table-wrap {
+      overflow-x: auto;
+    }
+    table.req-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+    table.req-table th {
+      text-align: left;
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    table.req-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+    table.req-table tr:hover td {
+      background: #fafbfc;
+    }
+    .status-pill {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .status-pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-approved { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-rejected { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--muted);
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      opacity: 0.4;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 15px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      max-width: 420px;
+      width: 100%;
+    }
+    .modal-box h4 {
+      margin-bottom: 14px;
+      font-size: 1.1rem;
+    }
+    .modal-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .modal-actions .btn { flex: 1; }
+
+    .history-list { margin-top: 10px; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #f9f9fb;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    /* ---- Task Screenshot Submissions ---- */
+    .ss-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .ss-card {
+      background: #f9f9fb;
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .ss-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      background: #eee;
+    }
+    .ss-card-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    .ss-card-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .ss-fullview-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      padding: 20px;
+    }
+    .ss-fullview-overlay.show { display: flex; }
+    .ss-fullview-overlay img {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 14px;
+    }
+
+    /* ---- Login screen ---- */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1e1e2d 0%, #2d1b33 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .login-box {
+      background: white;
+      border-radius: 20px;
+      padding: 35px 30px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .login-logo i {
+      font-size: 2.5rem;
+      color: var(--primary);
+    }
+    .login-logo h2 {
+      margin-top: 10px;
+      font-size: 1.3rem;
+      color: var(--text);
+    }
+    .login-logo p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .login-form .form-group {
+      margin-bottom: 16px;
+    }
+    .login-form .form-group label {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #444;
+      font-weight: 600;
+    }
+    .password-wrap {
+      position: relative;
+    }
+    .password-wrap .toggle-eye {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .login-error {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .login-error.show { display: block; }
+    .login-form .btn-primary {
+      width: 100%;
+      padding: 13px;
+      margin-top: 6px;
+    }
+    body.locked .sidebar,
+    body.locked .main-content {
+      display: none;
+    }
+    .logout-link {
+      margin-top: auto;
+    }
+    .logout-link a {
+      color: #ff8fb8 !important;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+        padding: 20px 8px;
+      }
+      .sidebar-logo span,
+      .nav-menu li a span {
+        display: none;
+      }
+      .nav-badge { right: 4px; top: 4px; }
+      .main-content {
+        margin-left: 70px;
+      }
+      .form-grid, .ad-slots-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyCifxw05peGi9lAJxyH1tw8uBfWznNyuhI",
+  authDomain: "gotasks-ern.firebaseapp.com",
+  databaseURL: "https://gotasks-ern-default-rtdb.firebaseio.com",
+  projectId: "gotasks-ern",
+  storageBucket: "gotasks-ern.firebasestorage.app",
+  messagingSenderId: "457081461962",
+  appId: "1:457081461962:web:1b62e4b3a5003c6052a833"
+};
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    console.log("Firebase Connected Successfully in Admin Panel!");
+  </script>
+  </head>
+<body class="locked">
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <i class="fa-solid fa-shield-halved"></i>
+      <h2>Mahim Admin Panel</h2>
+      <p>এডমিন একাউন্টে সাইন ইন করুন</p>
+    </div>
+    <div class="login-error" id="loginError">ভুল ইমেইল বা পাসওয়ার্ড</div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" id="loginEmail" placeholder="admin@mahim.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••">
+          <i class="fa-solid fa-eye toggle-eye" id="toggleEyeIcon" onclick="togglePasswordView()"></i>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="attemptLogin()">সাইন ইন</button>
+      <p style="text-align:center; margin-top:14px;">
+        <a href="#" onclick="openForgotPasswordModal(); return false;" style="color:var(--primary); font-size:0.9rem; font-weight:600; text-decoration:none;">পাসওয়ার্ড ভুলে গেছেন?</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="forgotPasswordModal">
+  <div class="modal-box">
+    <h4><i class="fa-solid fa-key"></i> পাসওয়ার্ড রিসেট করুন</h4>
+
+    <div id="fpStep1">
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">নতুন বা আপনার বর্তমান এডমিন ইমেইল দিন, আমরা সেই ইমেইলে একটি ভেরিফিকেশন কোড পাঠাবো। ভেরিফাই হলে এই ইমেইলটাই আপনার নতুন লগইন ইমেইল হয়ে যাবে।</p>
+      <div class="form-group">
+        <label>নতুন Admin Email</label>
+        <input type="email" class="form-control" id="fpEmailInput" placeholder="নতুন ইমেইল লিখুন">
+      </div>
+      <div class="login-error" id="fpStep1Error"></div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeForgotPasswordModal()">বাতিল</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="sendResetCode()">কোড পাঠান</button>
+      </div>
+    </div>
+
+    <div id="fpStep2" style="display:none;">
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">আপনার ইমেইলে পাঠানো ৬-সংখ্যার কোডটি দিন।</p>
+      <div class="form-group">
+        <label>ভেরিফিকেশন কোড</label>
+        <input type="text" class="form-control" id="fpCodeInput" placeholder="6-digit code" maxlength="6">
+      </div>
+      <div class="login-error" id="fpStep2Error"></div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeForgotPasswordModal()">বাতিল</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="verifyResetCode()">ভেরিফাই করুন</button>
+      </div>
+    </div>
+
+    <div id="fpStep3" style="display:none;">
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">আপনার নতুন পাসওয়ার্ড সেট করুন।</p>
+      <div class="form-group">
+        <label>নতুন পাসওয়ার্ড</label>
+        <input type="password" class="form-control" id="fpNewPasswordInput" placeholder="কমপক্ষে ৬ অক্ষর">
+      </div>
+      <div class="form-group">
+        <label>নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
+        <input type="password" class="form-control" id="fpConfirmPasswordInput" placeholder="আবার লিখুন">
+      </div>
+      <div class="login-error" id="fpStep3Error"></div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeForgotPasswordModal()">বাতিল</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="submitNewPassword()">পাসওয়ার্ড সেভ করুন</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <i class="fa-solid fa-shield-haltered"></i> <span>Admin</span>
+  </div>
+  <ul class="nav-menu">
+    <li><a href="#" class="active" data-section="general"><i class="fa-solid fa-gear"></i> <span>General</span></a></li>
+    <li><a href="#" data-section="appearance"><i class="fa-solid fa-palette"></i> <span>Appearance</span></a></li>
+    <li><a href="#" data-section="links"><i class="fa-solid fa-link"></i> <span>Links & URLs</span></a></li>
+    <li><a href="#" data-section="images"><i class="fa-solid fa-images"></i> <span>Images & Media</span></a></li>
+    <li><a href="#" data-section="features"><i class="fa-solid fa-sliders"></i> <span>Feature Toggle</span></a></li>
+    <li><a href="#" data-section="tasks"><i class="fa-solid fa-list-check"></i> <span>Tasks Control</span></a></li>
+    <li><a href="#" data-section="adslots"><i class="fa-solid fa-ad"></i> <span>Ad Slots (25 Links)</span></a></li>
+    <li><a href="#" data-section="withdraw"><i class="fa-solid fa-money-bill-transfer"></i> <span>Withdraw Requests</span><span class="nav-badge" id="pendingBadge" style="display:none;">0</span></a></li>
+    <li><a href="#" data-section="users"><i class="fa-solid fa-users"></i> <span>Users & Balance</span></a></li>
+    <li><a href="#" data-section="submissions"><i class="fa-solid fa-camera"></i> <span>Task Screenshots</span><span class="nav-badge" id="submissionsBadge" style="display:none;">0</span></a></li>
+    <li class="logout-link"><a href="#" onclick="logoutAdmin(); return false;"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></a></li>
+  </ul>
+</aside>
+
+<main class="main-content" id="adminMain">
+  <div class="top-bar">
+    <h2 class="page-title" id="pageTitle">⚙️ General Settings</h2>
+    <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> Super Admin</span>
+  </div>
+  <div id="dynamicContent"></div>
+</main>
+
+<div class="modal-overlay" id="reqModal">
+  <div class="modal-box" id="reqModalBody"></div>
+</div>
+
+<div class="ss-fullview-overlay" id="ssFullviewOverlay" onclick="closeSsFullview()">
+  <img id="ssFullviewImg" src="" alt="Screenshot">
+</div>
+
+<div class="toast-admin" id="adminToast">✅ Saved successfully</div>
+
+<script>
+  (function() {
+    const adminConfig = {
+      adminEmail: "admin@mahim.com",
+      adminPassword: "mahim@123",
+      appName: "Mahim",
+      appTagline: "Earn by tasks & ads",
+      currency: "TK",
+      minWithdraw: 50,
+      maxWithdraw: 5000,
+      primaryColor: "#e52d87",
+      secondaryColor: "#ff5e3a",
+      logoUrl: "",
+      faviconUrl: "",
+      telegramChannel1: "https://t.me/mahim_bangla",
+      telegramChannel2: "https://t.me/income_tips",
+      telegramChannel3: "https://t.me/mahim_update",
+      youtubeLink: "https://youtube.com/@mahim",
+      facebookLink: "https://facebook.com/mahimapp",
+      bannerImage: "https://via.placeholder.com/600x200/ff416c/white?text=Mahim+Banner",
+      taskIcon1: "",
+      taskIcon2: "",
+      enableAds: true,
+      enableTasks: true,
+      enableRefer: true,
+      enableWithdraw: true,
+      forceChannelJoin: true,
+      tasks: [
+        { title: "Official Channel Join", reward: 1, link: "https://t.me/mahim_bangla", image: "" },
+        { title: "Subscribe Youtube", reward: 10, link: "https://youtube.com/@mahim", image: "" },
+        { title: "Facebook Share", reward: 2, link: "https://facebook.com/mahimapp", image: "" },
+        { title: "Instagram Follow", reward: 2, link: "", image: "" },
+        { title: "App Review Dao", reward: 5, link: "", image: "" },
+        { title: "Friend Refer Koro", reward: 5, link: "", image: "" },
+        { title: "Daily Login Bonus", reward: 1, link: "", image: "" },
+        { title: "Survey Complete Koro", reward: 8, link: "", image: "" },
+        { title: "Video Dekho", reward: 1, link: "", image: "" },
+        { title: "Profile Complete Koro", reward: 3, link: "", image: "" }
+      ],
+      adSlot1Links: Array.from({length:25}, (_,i)=>`https://example.com/ad1-${i+1}`),
+      adSlot2Links: Array.from({length:25}, (_,i)=>`https://example.com/ad2-${i+1}`),
+      adSlot1Reward: 1,
+      adSlot2Reward: 1,
+      adSlot1CooldownHours: 24,
+      adSlot2CooldownHours: 24,
+      adSlot1DurationSeconds: 15,
+      adSlot2DurationSeconds: 15,
+      minReferralsRequired: 10,
+      withdrawFeePercent: 20
+    };
+
+    // ---- Users & withdraw requests (populated from real user activity / localStorage) ----
+    let users = [];
+
+    let withdrawRequests = [];
+
+    let currentFilter = "pending";
+
+    function saveConfig() {
+      localStorage.setItem('mahim_admin_config', JSON.stringify(adminConfig));
+      localStorage.setItem('mahim_users', JSON.stringify(users));
+      localStorage.setItem('mahim_withdraws', JSON.stringify(withdrawRequests));
+      showToast('সমস্ত সেটিংস সংরক্ষণ করা হয়েছে ✅');
+    }
+
+    function loadConfig() {
+      const saved = localStorage.getItem('mahim_admin_config');
+      if (saved) Object.assign(adminConfig, JSON.parse(saved));
+      const savedUsers = localStorage.getItem('mahim_users');
+      if (savedUsers) users = JSON.parse(savedUsers);
+      const savedW = localStorage.getItem('mahim_withdraws');
+      if (savedW) withdrawRequests = JSON.parse(savedW);
+    }
+    loadConfig();
+
+    function persistUsersAndWithdraws() {
+      localStorage.setItem('mahim_users', JSON.stringify(users));
+      localStorage.setItem('mahim_withdraws', JSON.stringify(withdrawRequests));
+    }
+
+    const dynamicContent = document.getElementById('dynamicContent');
+    const pageTitle = document.getElementById('pageTitle');
+
+    let currentSection = 'general';
+    function renderSection(section) {
+      currentSection = section;
+      switch(section) {
+        case 'general': renderGeneral(); break;
+        case 'appearance': renderAppearance(); break;
+        case 'links': renderLinks(); break;
+        case 'images': renderImages(); break;
+        case 'features': renderFeatures(); break;
+        case 'tasks': renderTasks(); break;
+        case 'adslots': renderAdSlots(); break;
+        case 'withdraw': renderWithdraw(); break;
+        case 'users': renderUsers(); break;
+        case 'submissions': renderSubmissions(); break;
+        default: renderGeneral();
+      }
+    }
+
+    function renderGeneral() {
+      pageTitle.textContent = '⚙️ General Settings';
+      dynamicContent.innerHTML = `
+        <div class="card">
+          <div class="section-header"><h3>🔐 Admin Login</h3></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Admin Email</label><input type="email" class="form-control" id="adminEmail" value="${adminConfig.adminEmail}"></div>
+            <div class="form-group"><label>Admin Password</label><input type="text" class="form-control" id="adminPassword" value="${adminConfig.adminPassword}"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="updateAdminLogin()">Save Login Info</button>
+        </div>
+        <div class="card">
+          <div class="section-header"><h3>📱 App Information</h3></div>
+          <div class="form-grid">
+            <div class="form-group"><label>App Name</label><input type="text" class="form-control" id="appName" value="${adminConfig.appName}"></div>
+            <div class="form-group"><label>Tagline</label><input type="text" class="form-control" id="appTagline" value="${adminConfig.appTagline}"></div>
+            <div class="form-group"><label>Currency</label><input type="text" class="form-control" id="currency" value="${adminConfig.currency}"></div>
+            <div class="form-group"><label>Min Withdraw</label><input type="number" class="form-control" id="minWithdraw" value="${adminConfig.minWithdraw}"></div>
+            <div class="form-group"><label>Max Withdraw</label><input type="number" class="form-control" id="maxWithdraw" value="${adminConfig.maxWithdraw}"></div>
+            <div class="form-group"><label>উইথড্রর জন্য ন্যূনতম রেফার সংখ্যা</label><input type="number" class="form-control" id="minReferralsRequired" value="${adminConfig.minReferralsRequired !== undefined ? adminConfig.minReferralsRequired : 10}" min="0"></div>
+            <div class="form-group"><label>উইথড্র চার্জ (%)</label><input type="number" class="form-control" id="withdrawFeePercent" value="${adminConfig.withdrawFeePercent !== undefined ? adminConfig.withdrawFeePercent : 20}" min="0" max="100" step="0.01"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:18px;" onclick="updateGeneral()">Save General</button>
+        </div>
+      `;
+    }
+    window.updateAdminLogin = function() {
+      const newEmail = document.getElementById('adminEmail').value.trim();
+      const newPassword = document.getElementById('adminPassword').value;
+      if (!newEmail || !newPassword) {
+        showToast('⚠️ ইমেইল ও পাসওয়ার্ড খালি রাখা যাবে না');
+        return;
+      }
+      adminConfig.adminEmail = newEmail;
+      adminConfig.adminPassword = newPassword;
+      saveConfig();
+    };
+    window.updateGeneral = function() {
+      adminConfig.appName = document.getElementById('appName').value;
+      adminConfig.appTagline = document.getElementById('appTagline').value;
+      adminConfig.currency = document.getElementById('currency').value;
+      adminConfig.minWithdraw = parseInt(document.getElementById('minWithdraw').value);
+      adminConfig.maxWithdraw = parseInt(document.getElementById('maxWithdraw').value);
+      adminConfig.minReferralsRequired = parseInt(document.getElementById('minReferralsRequired').value) || 0;
+      adminConfig.withdrawFeePercent = parseFloat(document.getElementById('withdrawFeePercent').value) || 0;
+      saveConfig();
+    };
+
+    function renderAppearance() {
+      pageTitle.textContent = '🎨 Appearance';
+      dynamicContent.innerHTML = `
+        <div class="card">
+          <div class="section-header"><h3>Color & Branding</h3></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Primary Color</label><input type="color" class="form-control" id="primaryColor" value="${adminConfig.primaryColor}"></div>
+            <div class="form-group"><label>Secondary Color</label><input type="color" class="form-control" id="secondaryColor" value="${adminConfig.secondaryColor}"></div>
+            <div class="form-group"><label>Logo URL</label><input type="text" class="form-control" id="logoUrl" value="${adminConfig.logoUrl}"></div>
+            <div class="form-group"><label>Favicon URL</label><input type="text" class="form-control" id="faviconUrl" value="${adminConfig.faviconUrl}"></div>
+          </div>
+          <button class="btn btn-primary" onclick="updateAppearance()">Save Appearance</button>
+        </div>
+      `;
+    }
+    window.updateAppearance = function() {
+      adminConfig.primaryColor = document.getElementById('primaryColor').value;
+      adminConfig.secondaryColor = document.getElementById('secondaryColor').value;
+      adminConfig.logoUrl = document.getElementById('logoUrl').value;
+      adminConfig.faviconUrl = document.getElementById('faviconUrl').value;
+      saveConfig();
+    };
+
+    function renderLinks() {
+      pageTitle.textContent = '🔗 Links & URLs';
+      dynamicContent.innerHTML = `
+        <div class="card">
+          <div class="section-header"><h3>Social & Channels</h3></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Channel 1</label><input class="form-control" id="tg1" value="${adminConfig.telegramChannel1}"></div>
+            <div class="form-group"><label>Channel 2</label><input class="form-control" id="tg2" value="${adminConfig.telegramChannel2}"></div>
+            <div class="form-group"><label>Channel 3</label><input class="form-control" id="tg3" value="${adminConfig.telegramChannel3}"></div>
+            <div class="form-group"><label>YouTube</label><input class="form-control" id="yt" value="${adminConfig.youtubeLink}"></div>
+            <div class="form-group"><label>Facebook</label><input class="form-control" id="fb" value="${adminConfig.facebookLink}"></div>
+          </div>
+          <button class="btn btn-primary" onclick="updateLinks()">Save Links</button>
+        </div>
+      `;
+    }
+    window.updateLinks = function() {
+      adminConfig.telegramChannel1 = document.getElementById('tg1').value;
+      adminConfig.telegramChannel2 = document.getElementById('tg2').value;
+      adminConfig.telegramChannel3 = document.getElementById('tg3').value;
+      adminConfig.youtubeLink = document.getElementById('yt').value;
+      adminConfig.facebookLink = document.getElementById('fb').value;
+      saveConfig();
+    };
+
+    function renderImages() {
+      pageTitle.textContent = '🖼️ Images & Media';
+      dynamicContent.innerHTML = `
+        <div class="card">
+          <div class="section-header"><h3>Banner & Icons</h3></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Banner URL</label><input class="form-control" id="banner" value="${adminConfig.bannerImage}"></div>
+            <div class="form-group"><label>Task Icon 1</label><input class="form-control" id="taskIcon1" value="${adminConfig.taskIcon1}"></div>
+            <div class="form-group"><label>Task Icon 2</label><input class="form-control" id="taskIcon2" value="${adminConfig.taskIcon2}"></div>
+          </div>
+          <div class="preview-box"><img src="${adminConfig.bannerImage}" onerror="this.style.display='none'"><div style="font-size:0.8rem;color:#888;">Preview</div></div>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="updateImages()">Save Images</button>
+        </div>
+      `;
+    }
+    window.updateImages = function() {
+      adminConfig.bannerImage = document.getElementById('banner').value;
+      adminConfig.taskIcon1 = document.getElementById('taskIcon1').value;
+      adminConfig.taskIcon2 = document.getElementById('taskIcon2').value;
+      saveConfig();
+    };
+
+    function renderFeatures() {
+      pageTitle.textContent = '🎛️ Feature Toggle';
+      const c = (v) => v ? 'checked' : '';
+      dynamicContent.innerHTML = `
+        <div class="card">
+          <div class="section-header"><h3>Enable / Disable</h3></div>
+          <div style="display:flex; flex-direction:column; gap:18px;">
+            <div class="toggle-switch"><label class="switch"><input type="checkbox" id="enableAds" ${c(adminConfig.enableAds)}><span class="slider"></span></label> <strong>Daily Ads</strong></div>
+            <div class="toggle-switch"><label class="switch"><input type="checkbox" id="enableTasks" ${c(adminConfig.enableTasks)}><span class="slider"></span></label> <strong>Task Center</strong></div>
+            <div class="toggle-switch"><label class="switch"><input type="checkbox" id="enableRefer" ${c(adminConfig.enableRefer)}><span class="slider"></span></label> <strong>Refer System</strong></div>
+            <div class="toggle-switch"><label class="switch"><input type="checkbox" id="enableWithdraw" ${c(adminConfig.enableWithdraw)}><span class="slider"></span></label> <strong>Withdraw</strong></div>
+            <div class="toggle-switch"><label class="switch"><input type="checkbox" id="forceChannelJoin" ${c(adminConfig.forceChannelJoin)}><span class="slider"></span></label> <strong>Force Channel Join</strong></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:20px;" onclick="updateFeatures()">Save Features</button>
+        </div>
+      `;
+    }
+    window.updateFeatures = function() {
+      adminConfig.enableAds = document.getElementById('enableAds').checked;
+      adminConfig.enableTasks = document.getElementById('enableTasks').checked;
+      adminConfig.enableRefer = document.getElementById('enableRefer').checked;
+      adminConfig.enableWithdraw = document.getElementById('enableWithdraw').checked;
+      adminConfig.forceChannelJoin = document.getElementById('forceChannelJoin').checked;
+      saveConfig();
+    };
+
+    function renderTasks() {
+      pageTitle.textContent = '📋 Tasks Control';
+      const cardsHtml = adminConfig.tasks.map((t, i) => `
+        <div class="card" style="margin-bottom:16px;">
+          <div class="section-header">
+            <h3>Task ${i+1}</h3>
+            ${t.image ? `<img src="${t.image}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Task ${i+1} Title</label>
+              <input class="form-control" id="taskTitle_${i}" value="${t.title}">
+            </div>
+            <div class="form-group">
+              <label>Reward (${adminConfig.currency})</label>
+              <input type="number" class="form-control" id="taskReward_${i}" value="${t.reward}">
+            </div>
+            <div class="form-group">
+              <label>Task Link (URL)</label>
+              <input class="form-control" id="taskLink_${i}" placeholder="https://..." value="${t.link}">
+            </div>
+            <div class="form-group">
+              <label>Task Image Link (URL)</label>
+              <input class="form-control" id="taskImage_${i}" placeholder="https://..." value="${t.image}">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>কাজ কি করতে হবে (নির্দেশনা)</label>
+              <textarea class="form-control" id="taskInstruction_${i}" placeholder="যেমন: চ্যানেলে জয়েন করে স্ক্রিনশট জমা দিন">${t.instruction || ''}</textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="updateSingleTask(${i})"><i class="fa-solid fa-floppy-disk"></i> Save Task ${i+1}</button>
+        </div>
+      `).join('');
+
+      dynamicContent.innerHTML = `
+        ${cardsHtml}
+        <button class="btn btn-primary" style="margin-top:6px;" onclick="updateTasks()">Save All Tasks</button>
+      `;
+    }
+    window.updateSingleTask = function(i) {
+      const t = adminConfig.tasks[i];
+      t.title = document.getElementById(`taskTitle_${i}`).value;
+      t.reward = parseFloat(document.getElementById(`taskReward_${i}`).value) || 0;
+      t.link = document.getElementById(`taskLink_${i}`).value.trim();
+      t.image = document.getElementById(`taskImage_${i}`).value.trim();
+      t.instruction = document.getElementById(`taskInstruction_${i}`).value.trim();
+      saveConfig();
+    };
+    window.updateTasks = function() {
+      adminConfig.tasks.forEach((t, i) => {
+        t.title = document.getElementById(`taskTitle_${i}`).value;
+        t.reward = parseFloat(document.getElementById(`taskReward_${i}`).value) || 0;
+        t.link = document.getElementById(`taskLink_${i}`).value.trim();
+        t.image = document.getElementById(`taskImage_${i}`).value.trim();
+        t.instruction = document.getElementById(`taskInstruction_${i}`).value.trim();
+      });
+      saveConfig();
+    };
+
+    function renderAdSlots() {
+      pageTitle.textContent = '📺 Ad Slots';
+      function listHtml(slotKey) {
+        return adminConfig[slotKey].map((link, i) => `
+          <li>
+            <span>#${i+1}: ${link}</span>
+            <button class="btn btn-outline btn-sm" onclick="editAdLink('${slotKey}', ${i})"><i class="fa-solid fa-pen"></i></button>
+          </li>
+        `).join('');
+      }
+      dynamicContent.innerHTML = `
+        <div class="ad-slots-grid">
+          <div class="card">
+            <div class="section-header"><h3>Ad Slot 1 (25 Links)</h3></div>
+            <div style="margin-bottom:12px;">
+              <label>প্রতিটি এড দেখার রিওয়ার্ড (${adminConfig.currency})</label>
+              <input type="number" class="form-control" id="adSlot1RewardInput" value="${adminConfig.adSlot1Reward !== undefined ? adminConfig.adSlot1Reward : 1}" min="0" step="0.01" onchange="updateAdSlotReward(1, this.value)">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label>রিসেট টাইম (ঘন্টা) — সব এড দেখা শেষ হলে কতক্ষণ পর আবার দেখা যাবে</label>
+              <input type="number" class="form-control" id="adSlot1CooldownInput" value="${adminConfig.adSlot1CooldownHours !== undefined ? adminConfig.adSlot1CooldownHours : 24}" min="0" step="1" onchange="updateAdSlotCooldown(1, this.value)">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label>এড দেখার সময় (সেকেন্ড) — ইউজারকে কতক্ষণ এড দেখতে হবে</label>
+              <input type="number" class="form-control" id="adSlot1DurationInput" value="${adminConfig.adSlot1DurationSeconds !== undefined ? adminConfig.adSlot1DurationSeconds : 15}" min="1" step="1" onchange="updateAdSlotDuration(1, this.value)">
+            </div>
+            <ul class="link-list">${listHtml('adSlot1Links')}</ul>
+          </div>
+          <div class="card">
+            <div class="section-header"><h3>Ad Slot 2 (25 Links)</h3></div>
+            <div style="margin-bottom:12px;">
+              <label>প্রতিটি এড দেখার রিওয়ার্ড (${adminConfig.currency})</label>
+              <input type="number" class="form-control" id="adSlot2RewardInput" value="${adminConfig.adSlot2Reward !== undefined ? adminConfig.adSlot2Reward : 1}" min="0" step="0.01" onchange="updateAdSlotReward(2, this.value)">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label>রিসেট টাইম (ঘন্টা) — সব এড দেখা শেষ হলে কতক্ষণ পর আবার দেখা যাবে</label>
+              <input type="number" class="form-control" id="adSlot2CooldownInput" value="${adminConfig.adSlot2CooldownHours !== undefined ? adminConfig.adSlot2CooldownHours : 24}" min="0" step="1" onchange="updateAdSlotCooldown(2, this.value)">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label>এড দেখার সময় (সেকেন্ড) — ইউজারকে কতক্ষণ এড দেখতে হবে</label>
+              <input type="number" class="form-control" id="adSlot2DurationInput" value="${adminConfig.adSlot2DurationSeconds !== undefined ? adminConfig.adSlot2DurationSeconds : 15}" min="1" step="1" onchange="updateAdSlotDuration(2, this.value)">
+            </div>
+            <ul class="link-list">${listHtml('adSlot2Links')}</ul>
+          </div>
+        </div>
+      `;
+    }
+    window.updateAdSlotReward = function(slotNumber, value) {
+      const reward = parseFloat(value) || 0;
+      adminConfig['adSlot' + slotNumber + 'Reward'] = reward;
+      saveConfig();
+    };
+    window.updateAdSlotCooldown = function(slotNumber, value) {
+      let hours = parseFloat(value);
+      if (isNaN(hours) || hours < 0) hours = 0;
+      adminConfig['adSlot' + slotNumber + 'CooldownHours'] = hours;
+      saveConfig();
+    };
+    window.updateAdSlotDuration = function(slotNumber, value) {
+      let seconds = parseInt(value);
+      if (isNaN(seconds) || seconds < 1) seconds = 1;
+      adminConfig['adSlot' + slotNumber + 'DurationSeconds'] = seconds;
+      saveConfig();
+    };
+    window.editAdLink = function(slotKey, index) {
+      const newLink = prompt('নতুন লিংক দিন:', adminConfig[slotKey][index]);
+      if (newLink !== null && newLink.trim() !== '') {
+        adminConfig[slotKey][index] = newLink.trim();
+        saveConfig();
+        renderAdSlots();
+      }
+    };
+
+    // ====================== WITHDRAW REQUESTS ======================
+    function updatePendingBadge() {
+      const pendingCount = withdrawRequests.filter(r => r.status === 'pending').length;
+      const badge = document.getElementById('pendingBadge');
+      if (pendingCount > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = pendingCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function findUser(userId) {
+      return users.find(u => u.id === userId);
+    }
+
+    function renderWithdraw() {
+      pageTitle.textContent = '💸 Withdraw Requests';
+      updatePendingBadge();
+
+      const pendingCount = withdrawRequests.filter(r => r.status === 'pending').length;
+      const approvedCount = withdrawRequests.filter(r => r.status === 'approved').length;
+      const rejectedCount = withdrawRequests.filter(r => r.status === 'rejected').length;
+      const totalPendingAmount = withdrawRequests.filter(r => r.status === 'pending').reduce((s,r)=>s+r.amount,0);
+
+      const filtered = currentFilter === 'all' ? withdrawRequests : withdrawRequests.filter(r => r.status === currentFilter);
+      const sorted = [...filtered].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      const rowsHtml = sorted.length ? sorted.map(r => {
+        const initials = r.userName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const statusClass = r.status === 'pending' ? 'status-pending' : r.status === 'approved' ? 'status-approved' : 'status-rejected';
+        const statusLabel = r.status === 'pending' ? 'পেন্ডিং' : r.status === 'approved' ? 'এপ্রুভড' : 'রিজেক্টেড';
+        return `
+          <tr>
+            <td>
+              <div class="user-mini">
+                <div class="user-avatar">${initials}</div>
+                <div>
+                  <div style="font-weight:600;">${r.userName}</div>
+                  <div style="font-size:0.78rem;color:var(--muted);">${r.phone}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-weight:700;color:var(--primary);">${r.amount} ${adminConfig.currency}</td>
+            <td>${r.method}<br><span style="font-size:0.78rem;color:var(--muted);">${r.number}</span></td>
+            <td>${r.date}</td>
+            <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+            <td>
+              <div class="action-btns">
+                ${r.status === 'pending' ? `
+                  <button class="btn btn-success btn-sm" onclick="openDecision('${r.id}', 'approved')"><i class="fa-solid fa-check"></i> এপ্রুভ</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDecision('${r.id}', 'rejected')"><i class="fa-solid fa-xmark"></i> রিজেক্ট</button>
+                ` : `<button class="btn btn-outline btn-sm" onclick="viewUserHistory('${r.userId}')"><i class="fa-solid fa-eye"></i> দেখুন</button>`}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('') : `<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-inbox"></i><div>কোনো রিকোয়েস্ট নেই</div></div></td></tr>`;
+
+      dynamicContent.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">${pendingCount}</div><div class="lbl">পেন্ডিং রিকোয়েস্ট</div></div>
+          <div class="stat-box"><div class="num">${totalPendingAmount} ${adminConfig.currency}</div><div class="lbl">পেন্ডিং টোটাল</div></div>
+          <div class="stat-box"><div class="num">${approvedCount}</div><div class="lbl">এপ্রুভড</div></div>
+          <div class="stat-box"><div class="num">${rejectedCount}</div><div class="lbl">রিজেক্টেড</div></div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <h3>রিকোয়েস্ট লিস্ট</h3>
+          </div>
+          <div class="filter-tabs">
+            <button class="filter-tab ${currentFilter==='pending'?'active':''}" onclick="setWithdrawFilter('pending')">পেন্ডিং (${pendingCount})</button>
+            <button class="filter-tab ${currentFilter==='approved'?'active':''}" onclick="setWithdrawFilter('approved')">এপ্রুভড</button>
+            <button class="filter-tab ${currentFilter==='rejected'?'active':''}" onclick="setWithdrawFilter('rejected')">রিজেক্টেড</button>
+            <button class="filter-tab ${currentFilter==='all'?'active':''}" onclick="setWithdrawFilter('all')">সব</button>
+          </div>
+          <div class="req-table-wrap">
+            <table class="req-table">
+              <thead><tr><th>ইউজার</th><th>পরিমাণ</th><th>মেথড</th><th>তারিখ</th><th>স্ট্যাটাস</th><th>একশন</th></tr></thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    window.setWithdrawFilter = function(filter) {
+      currentFilter = filter;
+      renderWithdraw();
+    };
+
+    window.openDecision = function(reqId, decision) {
+      const req = withdrawRequests.find(r => r.id === reqId);
+      if (!req) return;
+      const user = findUser(req.userId);
+      const modal = document.getElementById('reqModal');
+      const body = document.getElementById('reqModalBody');
+
+      if (decision === 'approved') {
+        body.innerHTML = `
+          <h4>✅ উইথড্র এপ্রুভ করবেন?</h4>
+          <div class="modal-row"><span>ইউজার</span><strong>${req.userName}</strong></div>
+          <div class="modal-row"><span>পরিমাণ</span><strong>${req.amount} ${adminConfig.currency}</strong></div>
+          <div class="modal-row"><span>মেথড</span><strong>${req.method} - ${req.number}</strong></div>
+          <div class="modal-row"><span>ইউজারের ব্যালেন্স</span><strong>${user ? user.balance : 'N/A'} ${adminConfig.currency}</strong></div>
+          <p style="font-size:0.85rem;color:var(--muted);margin-top:12px;">এপ্রুভ করলে এই পরিমাণ টাকা ইউজারকে পাঠানো হয়েছে বলে গণ্য হবে এবং তার ব্যালেন্স থেকে কেটে নেওয়া হবে।</p>
+          <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal()">বাতিল</button>
+            <button class="btn btn-success" onclick="confirmDecision('${reqId}','approved')">নিশ্চিত এপ্রুভ</button>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <h4>❌ উইথড্র রিজেক্ট করবেন?</h4>
+          <div class="modal-row"><span>ইউজার</span><strong>${req.userName}</strong></div>
+          <div class="modal-row"><span>পরিমাণ</span><strong>${req.amount} ${adminConfig.currency}</strong></div>
+          <div class="form-group" style="margin-top:14px;">
+            <label>রিজেক্ট করার কারণ</label>
+            <textarea class="form-control" id="rejectReason" placeholder="যেমন: ভুল নাম্বার, সন্দেহজনক একাউন্ট ইত্যাদি"></textarea>
+          </div>
+          <p style="font-size:0.85rem;color:var(--muted);margin-top:8px;">রিজেক্ট করলে ইউজারের ব্যালেন্সে কোনো পরিবর্তন হবে না, কারণ টাকা শুধু এপ্রুভ করলেই কাটা হয়।</p>
+          <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal()">বাতিল</button>
+            <button class="btn btn-danger" onclick="confirmDecision('${reqId}','rejected')">নিশ্চিত রিজেক্ট</button>
+          </div>
+        `;
+      }
+      modal.classList.add('show');
+    };
+
+    window.confirmDecision = function(reqId, decision) {
+      const req = withdrawRequests.find(r => r.id === reqId);
+      if (!req) return;
+
+      if (decision === 'rejected') {
+        const reasonEl = document.getElementById('rejectReason');
+        req.reason = reasonEl ? reasonEl.value.trim() : '';
+        // টাকা এপ্রুভ না হওয়া পর্যন্ত ব্যালেন্স থেকে কাটা হয় না, তাই রিজেক্ট করলে ব্যালেন্সে কিছু ফেরত দেওয়ার দরকার নেই।
+      } else {
+        // গুরুত্বপূর্ণ: ইউজার যখন উইথড্র রিকোয়েস্ট সাবমিট করে (মূল অ্যাপ থেকে), তখনই তার ব্যালেন্স
+        // থেকে টাকা কেটে নেওয়া হয় এবং totalWithdrawn বাড়ানো হয় (যাতে একই টাকা দুইবার তোলা না যায়)।
+        // তাই এখানে এপ্রুভ করার সময় আবার ব্যালেন্স চেক/কাটা করলে সেটা ডাবল-ডিডাকশন হয়ে যায় এবং
+        // ব্যালেন্স কম দেখিয়ে এপ্রুভ আটকে যায়। এপ্রুভ করার সময় শুধু স্ট্যাটাস পরিবর্তন করাই যথেষ্ট।
+      }
+      req.status = decision;
+      persistUsersAndWithdraws();
+      closeModal();
+      showToast(decision === 'approved' ? '✅ উইথড্র এপ্রুভ করা হয়েছে' : '❌ উইথড্র রিজেক্ট করা হয়েছে');
+      renderWithdraw();
+    };
+
+    window.closeModal = function() {
+      document.getElementById('reqModal').classList.remove('show');
+    };
+
+    // ====================== USERS & BALANCE ======================
+    function renderUsers() {
+      pageTitle.textContent = '👥 Users & Balance';
+      const totalBalance = users.reduce((s,u)=>s+u.balance,0);
+      const totalUsers = users.length;
+
+      const rows = users.map(u => {
+        const initials = u.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        return `
+          <tr>
+            <td>
+              <div class="user-mini">
+                <div class="user-avatar">${initials}</div>
+                <div>
+                  <div style="font-weight:600;">${u.name}</div>
+                  <div style="font-size:0.78rem;color:var(--muted);">${u.phone}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size:0.85rem;font-weight:600;">${u.id}</div>
+            </td>
+            <td style="font-weight:700;color:var(--primary);">${u.balance} ${adminConfig.currency}</td>
+            <td>${u.totalEarned} ${adminConfig.currency}</td>
+            <td>${u.totalWithdrawn} ${adminConfig.currency}</td>
+            <td>${u.joined}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="viewUserHistory('${u.id}')"><i class="fa-solid fa-eye"></i> হিস্ট্রি</button>
+              <button class="btn btn-primary btn-sm" onclick="addUserBalance('${u.id}')"><i class="fa-solid fa-plus"></i> ব্যালেন্স যোগ</button>
+              <button class="btn btn-danger btn-sm" onclick="deductUserBalance('${u.id}')"><i class="fa-solid fa-minus"></i> ব্যালেন্স কাটুন</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      dynamicContent.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">${totalUsers}</div><div class="lbl">টোটাল ইউজার</div></div>
+          <div class="stat-box"><div class="num">${totalBalance} ${adminConfig.currency}</div><div class="lbl">টোটাল ব্যালেন্স</div></div>
+        </div>
+        <div class="card">
+          <div class="section-header"><h3>সব ইউজার</h3></div>
+          <div class="req-table-wrap">
+            <table class="req-table">
+              <thead><tr><th>ইউজার</th><th>UID</th><th>ব্যালেন্স</th><th>মোট আয়</th><th>মোট উইথড্র</th><th>জয়েন</th><th>একশন</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addUserBalance = function(userId) {
+      const user = findUser(userId);
+      if (!user) return;
+      const input = prompt(`${user.name} এর ব্যালেন্সে কত টাকা যোগ করতে চান?`, '0');
+      if (input === null) return;
+      const amount = parseFloat(input);
+      if (isNaN(amount) || amount === 0) {
+        alert('সঠিক একটি পরিমাণ দিন');
+        return;
+      }
+      user.balance = (user.balance || 0) + amount;
+      if (amount > 0) {
+        user.totalEarned = (user.totalEarned || 0) + amount;
+      }
+      persistUsersAndWithdraws();
+      renderUsers();
+      alert(`${user.name} এর ব্যালেন্সে ${amount} ${adminConfig.currency} যোগ হয়েছে। নতুন ব্যালেন্স: ${user.balance} ${adminConfig.currency}`);
+    };
+
+    window.deductUserBalance = function(userId) {
+      const user = findUser(userId);
+      if (!user) return;
+      const input = prompt(`${user.name} এর ব্যালেন্স থেকে কত টাকা কাটতে চান?`, '0');
+      if (input === null) return;
+      const amount = parseFloat(input);
+      if (isNaN(amount) || amount <= 0) {
+        alert('সঠিক একটি পরিমাণ দিন');
+        return;
+      }
+      const currentBalance = user.balance || 0;
+      if (amount > currentBalance) {
+        alert(`ইউজারের ব্যালেন্সে যথেষ্ট টাকা নেই। বর্তমান ব্যালেন্স: ${currentBalance} ${adminConfig.currency}`);
+        return;
+      }
+      user.balance = currentBalance - amount;
+      persistUsersAndWithdraws();
+      renderUsers();
+      alert(`${user.name} এর ব্যালেন্স থেকে ${amount} ${adminConfig.currency} কাটা হয়েছে। নতুন ব্যালেন্স: ${user.balance} ${adminConfig.currency}`);
+    };
+
+    window.viewUserHistory = function(userId) {
+      const user = findUser(userId);
+      if (!user) return;
+      const history = withdrawRequests.filter(r => r.userId === userId).sort((a,b)=> new Date(b.date)-new Date(a.date));
+
+      const modal = document.getElementById('reqModal');
+      const body = document.getElementById('reqModalBody');
+      const historyHtml = history.length ? history.map(r => {
+        const statusClass = r.status === 'pending' ? 'status-pending' : r.status === 'approved' ? 'status-approved' : 'status-rejected';
+        const statusLabel = r.status === 'pending' ? 'পেন্ডিং' : r.status === 'approved' ? 'এপ্রুভড' : 'রিজেক্টেড';
+        return `<div class="history-item">
+          <span>${r.date}<br><span style="color:var(--muted);">${r.method}</span></span>
+          <span>${r.amount} ${adminConfig.currency}</span>
+          <span class="status-pill ${statusClass}">${statusLabel}</span>
+        </div>`;
+      }).join('') : `<div class="empty-state"><i class="fa-solid fa-inbox"></i><div>কোনো হিস্ট্রি নেই</div></div>`;
+
+      body.innerHTML = `
+        <h4>${user.name} এর হিস্ট্রি</h4>
+        <div class="modal-row"><span>বর্তমান ব্যালেন্স</span><strong>${user.balance} ${adminConfig.currency}</strong></div>
+        <div class="modal-row"><span>মোট আয়</span><strong>${user.totalEarned} ${adminConfig.currency}</strong></div>
+        <div class="modal-row"><span>মোট উইথড্র</span><strong>${user.totalWithdrawn} ${adminConfig.currency}</strong></div>
+        <div class="history-list">${historyHtml}</div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" style="flex:1;" onclick="closeModal()">বন্ধ করুন</button>
+        </div>
+      `;
+      modal.classList.add('show');
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('adminToast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ====================== TASK SCREENSHOT SUBMISSIONS ======================
+    function getSubmissions() {
+      try {
+        return JSON.parse(localStorage.getItem('mahim_task_submissions') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveSubmissions(list) {
+      localStorage.setItem('mahim_task_submissions', JSON.stringify(list));
+    }
+
+    function updateSubmissionsBadge() {
+      const submissions = getSubmissions();
+      const pendingCount = submissions.filter(s => s.status === 'pending').length;
+      const badge = document.getElementById('submissionsBadge');
+      if (!badge) return;
+      if (pendingCount > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = pendingCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Live-check for newly submitted user screenshots so the admin is notified
+    // immediately (badge + toast) without needing to manually refresh/reload.
+    let lastKnownPendingCount = 0;
+    function checkForNewScreenshotSubmissions() {
+      const pendingCount = getSubmissions().filter(s => s.status === 'pending').length;
+      if (pendingCount > lastKnownPendingCount) {
+        const newOnes = pendingCount - lastKnownPendingCount;
+        showToast(`📷 নতুন ${newOnes}টি স্ক্রিনশট জমা পড়েছে! মোট পেন্ডিং: ${pendingCount}`);
+      }
+      lastKnownPendingCount = pendingCount;
+      updateSubmissionsBadge();
+      if (currentSection === 'submissions') {
+        renderSubmissions();
+      }
+    }
+
+    let submissionsFilter = 'pending';
+
+    function renderSubmissions() {
+      pageTitle.textContent = '📷 Task Screenshots';
+      const submissions = getSubmissions();
+      updateSubmissionsBadge();
+
+      const pendingCount = submissions.filter(s => s.status === 'pending').length;
+      const approvedCount = submissions.filter(s => s.status === 'approved').length;
+      const rejectedCount = submissions.filter(s => s.status === 'rejected').length;
+
+      const filtered = submissionsFilter === 'all' ? submissions : submissions.filter(s => s.status === submissionsFilter);
+      const sorted = [...filtered].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+      const cardsHtml = sorted.length ? sorted.map(s => {
+        const statusClass = s.status === 'pending' ? 'status-pending' : s.status === 'approved' ? 'status-approved' : 'status-rejected';
+        const statusLabel = s.status === 'pending' ? 'পেন্ডিং' : s.status === 'approved' ? 'এপ্রুভড' : 'রিজেক্টেড';
+        const img = s.image || '';
+        return `
+          <div class="ss-card">
+            <img src="${img}" onclick="openSsFullview('${s.id}')" onerror="this.style.opacity='0.3'">
+            <div class="ss-card-title">${s.taskTitle || 'Task'}</div>
+            <div class="ss-card-meta">${s.userName || s.userId || ''} • ${s.date || ''}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <span class="status-pill ${statusClass}">${statusLabel}</span>
+              ${s.status === 'pending' ? `
+                <div class="action-btns">
+                  <button class="btn btn-success btn-sm" onclick="decideSubmission('${s.id}','approved')"><i class="fa-solid fa-check"></i></button>
+                  <button class="btn btn-danger btn-sm" onclick="decideSubmission('${s.id}','rejected')"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('') : `<div class="empty-state"><i class="fa-solid fa-camera-retro"></i><div>কোনো স্ক্রিনশট নেই</div></div>`;
+
+      dynamicContent.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">${pendingCount}</div><div class="lbl">পেন্ডিং স্ক্রিনশট</div></div>
+          <div class="stat-box"><div class="num">${approvedCount}</div><div class="lbl">এপ্রুভড</div></div>
+          <div class="stat-box"><div class="num">${rejectedCount}</div><div class="lbl">রিজেক্টেড</div></div>
+          <div class="stat-box"><div class="num">${submissions.length}</div><div class="lbl">সর্বমোট</div></div>
+        </div>
+        <div class="card">
+          <div class="section-header"><h3>ইউজারদের জমা দেওয়া স্ক্রিনশট</h3></div>
+          <div class="filter-tabs">
+            <button class="filter-tab ${submissionsFilter==='pending'?'active':''}" onclick="setSubmissionsFilter('pending')">পেন্ডিং (${pendingCount})</button>
+            <button class="filter-tab ${submissionsFilter==='approved'?'active':''}" onclick="setSubmissionsFilter('approved')">এপ্রুভড</button>
+            <button class="filter-tab ${submissionsFilter==='rejected'?'active':''}" onclick="setSubmissionsFilter('rejected')">রিজেক্টেড</button>
+            <button class="filter-tab ${submissionsFilter==='all'?'active':''}" onclick="setSubmissionsFilter('all')">সব</button>
+          </div>
+          <div class="ss-grid">${cardsHtml}</div>
+        </div>
+      `;
+    }
+
+    window.setSubmissionsFilter = function(filter) {
+      submissionsFilter = filter;
+      renderSubmissions();
+    };
+
+    window.decideSubmission = function(subId, decision) {
+      const submissions = getSubmissions();
+      const sub = submissions.find(s => s.id === subId);
+      if (!sub) return;
+
+      if (decision === 'approved' && sub.status !== 'approved') {
+        // টাস্কের রিওয়ার্ড বের করা: সাবমিশনে সরাসরি reward থাকলে সেটা, নাহলে টাস্ক লিস্ট থেকে খুঁজে বের করা হবে
+        let rewardAmount = Number(sub.reward || sub.taskReward || 0);
+        if (!rewardAmount) {
+          const matchedTask = adminConfig.tasks.find(t => t.title === sub.taskTitle);
+          if (matchedTask) rewardAmount = Number(matchedTask.reward || 0);
+        }
+        const user = findUser(sub.userId);
+        if (user && rewardAmount > 0) {
+          user.balance = (user.balance || 0) + rewardAmount;
+          user.totalEarned = (user.totalEarned || 0) + rewardAmount;
+          persistUsersAndWithdraws();
+        }
+      }
+
+      sub.status = decision;
+      saveSubmissions(submissions);
+      showToast(decision === 'approved' ? '✅ স্ক্রিনশট এপ্রুভ করা হয়েছে এবং ইউজারের ব্যালেন্সে রিওয়ার্ড যোগ হয়েছে' : '❌ স্ক্রিনশট রিজেক্ট করা হয়েছে');
+      renderSubmissions();
+    };
+
+    window.openSsFullview = function(subId) {
+      const submissions = getSubmissions();
+      const sub = submissions.find(s => s.id === subId);
+      if (!sub) return;
+      document.getElementById('ssFullviewImg').src = sub.image || '';
+      document.getElementById('ssFullviewOverlay').classList.add('show');
+    };
+
+    window.closeSsFullview = function() {
+      document.getElementById('ssFullviewOverlay').classList.remove('show');
+    };
+
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        renderSection(link.dataset.section);
+      });
+    });
+
+    document.getElementById('reqModal').addEventListener('click', (e) => {
+      if (e.target.id === 'reqModal') closeModal();
+    });
+
+    // ====================== LOGIN / AUTH ======================
+    window.togglePasswordView = function() {
+      const pwd = document.getElementById('loginPassword');
+      const icon = document.getElementById('toggleEyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        pwd.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    };
+
+    window.attemptLogin = function() {
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+      const errorBox = document.getElementById('loginError');
+
+      if (email === adminConfig.adminEmail.toLowerCase() && password === adminConfig.adminPassword) {
+        errorBox.classList.remove('show');
+        sessionStorage.setItem('mahim_admin_logged_in', 'true');
+        unlockAdminPanel();
+      } else {
+        errorBox.classList.add('show');
+      }
+    };
+
+    // ====================== FORGOT PASSWORD ======================
+    let pendingResetEmail = null;
+    let pendingResetCode = null;
+    let pendingResetCodeExpiry = null;
+
+    window.openForgotPasswordModal = function() {
+      document.getElementById('fpEmailInput').value = '';
+      document.getElementById('fpCodeInput').value = '';
+      document.getElementById('fpNewPasswordInput').value = '';
+      document.getElementById('fpConfirmPasswordInput').value = '';
+      document.getElementById('fpStep1Error').classList.remove('show');
+      document.getElementById('fpStep2Error').classList.remove('show');
+      document.getElementById('fpStep3Error').classList.remove('show');
+      document.getElementById('fpStep1').style.display = 'block';
+      document.getElementById('fpStep2').style.display = 'none';
+      document.getElementById('fpStep3').style.display = 'none';
+      pendingResetEmail = null;
+      pendingResetCode = null;
+      pendingResetCodeExpiry = null;
+      document.getElementById('forgotPasswordModal').classList.add('show');
+    };
+
+    window.closeForgotPasswordModal = function() {
+      document.getElementById('forgotPasswordModal').classList.remove('show');
+    };
+
+    window.sendResetCode = function() {
+      const email = document.getElementById('fpEmailInput').value.trim().toLowerCase();
+      const errorBox = document.getElementById('fpStep1Error');
+
+      if (!email) {
+        errorBox.textContent = 'ইমেইল দিন';
+        errorBox.classList.add('show');
+        return;
+      }
+      // সাধারণ ইমেইল ফরম্যাট চেক (এখন যেকোনো বৈধ ইমেইল দেওয়া যাবে, শুধু পুরনো এডমিন ইমেইলেই সীমাবদ্ধ নয়)
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        errorBox.textContent = 'সঠিক ইমেইল ফরম্যাট দিন';
+        errorBox.classList.add('show');
+        return;
+      }
+      errorBox.classList.remove('show');
+
+      pendingResetEmail = email;
+      pendingResetCode = String(Math.floor(100000 + Math.random() * 900000));
+      pendingResetCodeExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes
+
+      // ডেমো/প্রিভিউ মোড: আসল ইমেইল সার্ভার যুক্ত না থাকায় কোডটি এখানে টোস্ট আকারে দেখানো হচ্ছে।
+      // ব্যাকএন্ড/ইমেইল সার্ভিস যুক্ত করলে এখানে আসল ইমেইলে কোড পাঠানো যাবে।
+      showToast(`📧 ভেরিফিকেশন কোড: ${pendingResetCode} (ডেমো মোড - ইমেইলে পাঠানো হলো ধরে নিন)`);
+
+      document.getElementById('fpStep1').style.display = 'none';
+      document.getElementById('fpStep2').style.display = 'block';
+    };
+
+    window.verifyResetCode = function() {
+      const code = document.getElementById('fpCodeInput').value.trim();
+      const errorBox = document.getElementById('fpStep2Error');
+
+      if (!code) {
+        errorBox.textContent = 'কোড দিন';
+        errorBox.classList.add('show');
+        return;
+      }
+      if (!pendingResetCode || Date.now() > pendingResetCodeExpiry) {
+        errorBox.textContent = 'কোডের মেয়াদ শেষ হয়ে গেছে, আবার চেষ্টা করুন';
+        errorBox.classList.add('show');
+        return;
+      }
+      if (code !== pendingResetCode) {
+        errorBox.textContent = 'কোডটি সঠিক নয়';
+        errorBox.classList.add('show');
+        return;
+      }
+      errorBox.classList.remove('show');
+      document.getElementById('fpStep2').style.display = 'none';
+      document.getElementById('fpStep3').style.display = 'block';
+    };
+
+    window.submitNewPassword = function() {
+      const newPassword = document.getElementById('fpNewPasswordInput').value;
+      const confirmPassword = document.getElementById('fpConfirmPasswordInput').value;
+      const errorBox = document.getElementById('fpStep3Error');
+
+      if (newPassword.length < 6) {
+        errorBox.textContent = 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে';
+        errorBox.classList.add('show');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        errorBox.textContent = 'পাসওয়ার্ড দুটি মিলছে না';
+        errorBox.classList.add('show');
+        return;
+      }
+      errorBox.classList.remove('show');
+
+      // ভেরিফাই করা নতুন ইমেইলটাকেই এখন থেকে এডমিন লগইন ইমেইল হিসেবে সেভ করা হচ্ছে
+      adminConfig.adminEmail = pendingResetEmail;
+      adminConfig.adminPassword = newPassword;
+      saveConfig();
+      pendingResetEmail = null;
+      pendingResetCode = null;
+      pendingResetCodeExpiry = null;
+
+      closeForgotPasswordModal();
+      document.getElementById('loginEmail').value = adminConfig.adminEmail;
+      document.getElementById('loginPassword').value = '';
+      showToast('✅ ইমেইল ও পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে, এখন নতুন ইমেইল-পাসওয়ার্ড দিয়ে সাইন ইন করুন');
+    };
+
+    window.logoutAdmin = function() {
+      sessionStorage.removeItem('mahim_admin_logged_in');
+      document.body.classList.add('locked');
+      document.getElementById('loginOverlay').style.display = 'flex';
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginError').classList.remove('show');
+    };
+
+    function unlockAdminPanel() {
+      document.body.classList.remove('locked');
+      document.getElementById('loginOverlay').style.display = 'none';
+      renderSection('general');
+      updatePendingBadge();
+      updateSubmissionsBadge();
+      lastKnownPendingCount = getSubmissions().filter(s => s.status === 'pending').length;
+      setInterval(checkForNewScreenshotSubmissions, 5000);
+    }
+
+    document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    if (sessionStorage.getItem('mahim_admin_logged_in') === 'true') {
+      unlockAdminPanel();
+    } else {
+      document.getElementById('loginOverlay').style.display = 'flex';
+    }
+  })();
+</script>
+</body>
+</html>
