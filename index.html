@@ -1462,6 +1462,45 @@
       const bonus = (adminConfig.referralBonus !== undefined && adminConfig.referralBonus !== null) ? adminConfig.referralBonus : 1;
       const bonusTextEl = document.getElementById('referBonusText');
       if (bonusTextEl) bonusTextEl.textContent = `প্রতি ফ্রেন্ডে ${bonus} ${adminConfig.currency || 'TK'}!`;
+      renderLeaderboard();
+    }
+
+    // ---------- TOP REFERS LEADERBOARD ----------
+    // আগে "Top Refers" কার্ডে সবসময় স্ট্যাটিক "এখনো কোনো রেফার নেই" টেক্সট দেখাত,
+    // কোনো ইউজার কতজনকে রেফার করেছে তা কখনো দেখানো হতো না। এখন সব ইউজারকে
+    // referralCount অনুযায়ী সাজিয়ে (বেশি থেকে কম) টপ ১০ জনকে নাম ও রেফার সংখ্যাসহ দেখায়।
+    function renderLeaderboard() {
+      const box = document.getElementById('leaderboardList');
+      if (!box) return;
+      let users = [];
+      try {
+        users = getUsersStore();
+      } catch (e) {
+        users = [];
+      }
+      const top = users
+        .filter(u => Number(u.referralCount || 0) > 0)
+        .sort((a, b) => Number(b.referralCount || 0) - Number(a.referralCount || 0))
+        .slice(0, 10);
+
+      if (top.length === 0) {
+        box.style.textAlign = 'center';
+        box.style.color = '#888';
+        box.textContent = 'এখনো কোনো রেফার নেই';
+        return;
+      }
+
+      box.style.textAlign = 'left';
+      box.style.color = '';
+      const medals = ['🥇', '🥈', '🥉'];
+      box.innerHTML = top.map((u, i) => {
+        const rankLabel = medals[i] || `${i + 1}.`;
+        const isMe = u.id === currentUserId();
+        return `<div class="leaderboard-row" style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; ${i < top.length - 1 ? 'border-bottom:1px dashed #eee;' : ''}">
+          <span>${rankLabel} ${u.name || 'User'}${isMe ? ' <span style="color:#e52d87; font-size:0.75rem;">(আপনি)</span>' : ''}</span>
+          <span style="font-weight:700; color:#e52d87;">${Number(u.referralCount || 0)} জন</span>
+        </div>`;
+      }).join('');
     }
 
     function renderBalance() {
@@ -2053,6 +2092,9 @@
         reconcileWithdrawRefunds();
         renderBalance();
         renderWithdrawHistory();
+      }
+      if (tabId === 'refer') {
+        renderReferralInfo();
       }
     };
 
