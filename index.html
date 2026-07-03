@@ -1946,13 +1946,52 @@
       if (savedEmail && emailInput) emailInput.value = savedEmail; // রিলোডের পরও ইনপুট বক্সে সঠিক ইমেইল থাকবে
       hideAuthScreen();
     } else {
-      // ইমেইল/পাসওয়ার্ড ফর্ম বাদ দিয়ে সরাসরি লোডিং স্ক্রিন দেখিয়ে, সংক্ষিপ্ত সময় পর
-      // ডেমো একাউন্ট দিয়ে অটোমেটিক সাইন ইন করে অ্যাপে ঢুকিয়ে দেয়।
-      setTimeout(function () {
-        emailInput.value = VALID_EMAIL;
-        passwordInput.value = DEFAULT_PASSWORD;
-        handleSignIn();
-      }, 1500);
+      // ---------- TELEGRAM AUTO-LOGIN ----------
+      // আগে এখানে সবাইকে (Telegram-এ যেই খুলুক না কেন) একই demo@mahim.com একাউন্টে অটো সাইন-ইন করানো হতো।
+      // এই কারণেই রেফার কাউন্ট বাড়ছিল না — প্রতিটা নতুন ভিজিটর আলাদা ইউজার হিসেবে তৈরিই হচ্ছিল না, সবাই
+      // একই ডেমো ইউজার হয়ে যাচ্ছিল। এখন Telegram Mini App-এর ভেতরে খুললে Telegram নিজে থেকেই পাঠানো
+      // real ইউনিক Telegram user id দিয়ে প্রতিটা মানুষের নিজস্ব আলাদা একাউন্ট (tg<id>@telegram.user)
+      // অটো তৈরি হয়/লগইন হয় — পাসওয়ার্ড লাগে না। এতে ২য়, ৩য় ... প্রতিটা রেফারড ইউজার সত্যিকারের নতুন
+      // ইউজার হিসেবে তৈরি হবে এবং findOrCreateUser-এর রেফারেল বোনাস লজিক ঠিকমতো চলবে।
+      const tgUser = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) ? window.Telegram.WebApp.initDataUnsafe.user : null;
+      // আসল Telegram Mini App এর ভেতরে খোলা হয়েছে কিনা সেটা initData (signed raw string) দিয়ে বোঝা যায়।
+      // এটা তখনই খালি থাকে না, যখন লিংকটা বট-এর Mini App বাটন/মেনু দিয়ে খোলা হয়েছে।
+      const isInsideTelegram = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+
+      if (tgUser && tgUser.id) {
+        // Telegram থেকে real user id পাওয়া গেছে — সেটা দিয়েই সাইন-ইন
+        signInAsTelegramUser(tgUser);
+      } else if (isInsideTelegram) {
+        // Telegram Mini App-এর ভেতরেই খোলা হয়েছে, কিন্তু কোনো কারণে user info পাওয়া যায়নি।
+        // এই ক্ষেত্রে আগে সবাইকে একই demo@mahim.com একাউন্টে ফেলে দেওয়া হতো (এটাই মূল বাগ) —
+        // এখন প্রতিটা ডিভাইসের জন্য আলাদা একটা guest id তৈরি/সংরক্ষণ করে রাখা হয় (localStorage-এ),
+        // যাতে কেউ ভুলে একে অপরের একাউন্টে/নামে ঢুকে না যায়।
+        let guestId = localStorage.getItem('mahim_guest_id');
+        if (!guestId) {
+          guestId = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          localStorage.setItem('mahim_guest_id', guestId);
+        }
+        signInAsTelegramUser({ id: guestId, first_name: 'User ' + guestId.slice(-5) });
+      } else {
+        // Telegram-এর বাইরে (সাধারণ ব্রাউজার) খুললে আগের মতোই ডেমো একাউন্ট দিয়ে অটো সাইন-ইন হবে (টেস্টিং-এর জন্য)
+        setTimeout(function () {
+          emailInput.value = VALID_EMAIL;
+          passwordInput.value = DEFAULT_PASSWORD;
+          handleSignIn();
+        }, 1500);
+      }
+    }
+
+    // Telegram থেকে পাওয়া real user info দিয়ে সাইন-ইন/একাউন্ট তৈরি করে (পাসওয়ার্ড ছাড়াই)
+    function signInAsTelegramUser(tgUser) {
+      const email = 'tg' + tgUser.id + '@telegram.user';
+      const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ').trim() || (tgUser.username ? '@' + tgUser.username : ('User ' + tgUser.id));
+      findOrCreateUser(email, { name: name });
+      sessionStorage.setItem('mahim_logged_in', 'true');
+      sessionStorage.setItem('mahim_current_email', email);
+      if (emailInput) emailInput.value = email;
+      hideAuthScreen();
+      applyAdminConfigToUI();
     }
 
     // Sign in handler
