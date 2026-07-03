@@ -6,6 +6,7 @@
   <title>Mahim - Sign In</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
       --primary-bg: #f4f6f9;
@@ -1012,7 +1013,7 @@
         <div class="card refer-box" style="text-align:center;">
           <i class="fa-solid fa-gift"></i>
           <h3>বন্ধুদের রেফার করুন</h3>
-          <p style="color:#666;">প্রতি ফ্রেন্ডে 1 TK!</p>
+          <p style="color:#666;" id="referBonusText">প্রতি ফ্রেন্ডে 1 TK!</p>
           <div class="refer-link-container">
             <input type="text" id="referLink" value="" readonly>
             <button class="btn-copy" onclick="copyReferLink()"><i class="fa-regular fa-copy"></i></button>
@@ -1165,7 +1166,9 @@
       adSlot1DurationSeconds: 15,
       adSlot2DurationSeconds: 15,
       minReferralsRequired: 10,
-      withdrawFeePercent: 20
+      withdrawFeePercent: 20,
+      referralBonus: 1,
+      telegramBotAppUrl: "https://t.me/Go_tasks_ern_bot/app"
     };
 
     let adminConfig = defaultAdminConfig;
@@ -1177,6 +1180,33 @@
     } catch (e) {
       console.warn('Admin config load failed, using defaults', e);
     }
+
+    // ---------- REFERRAL CODE CAPTURE ----------
+    // Telegram Mini App লিংক (t.me/Go_tasks_ern_bot/app?startapp=UID) দিয়ে ঢুকলে Telegram নিজে থেকেই
+    // সেই কোডটা Telegram.WebApp.initDataUnsafe.start_param এ পাঠায়। ব্রাউজারে টেস্ট করার জন্য ?ref=UID
+    // ও কাজ করবে। যে UID/কোড দিয়ে ইউজার প্রথমবার ঢোকে সেটা sessionStorage-এ রাখা হয়, যাতে সাইন-ইন করার
+    // পরেও (পেজ রিলোড হলেও) রেফারেল কোডটা হারিয়ে না যায়, যতক্ষণ না নতুন একাউন্ট তৈরি হয়ে বোনাস দেওয়া হয়।
+    function capturePendingReferral() {
+      try {
+        if (window.Telegram && window.Telegram.WebApp) {
+          window.Telegram.WebApp.ready();
+        }
+        let code = null;
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.start_param) {
+          code = window.Telegram.WebApp.initDataUnsafe.start_param;
+        }
+        if (!code) {
+          const params = new URLSearchParams(window.location.search);
+          code = params.get('startapp') || params.get('ref');
+        }
+        if (code) {
+          sessionStorage.setItem('mahim_pending_ref', code.trim());
+        }
+      } catch (e) {
+        console.warn('Referral capture failed', e);
+      }
+    }
+    capturePendingReferral();
 
     function applyAdminConfigToUI() {
       // App name / title
@@ -1376,6 +1406,27 @@
           referredBy: (extra && extra.referredBy) || (legacy.migratedProfile && legacy.migratedProfile.referredBy) || null,
           joined: (extra && extra.joined) || (legacy.migratedProfile && legacy.migratedProfile.joined) || new Date().toISOString().slice(0, 10)
         };
+
+        // ---------- REFERRAL BONUS ----------
+        // নতুন একাউন্ট তৈরি হওয়ার সাথে সাথে একবারই চেক করে, sessionStorage-এ রাখা রেফারেল কোড
+        // (রেফারারের UID) দিয়ে রেফারারকে খুঁজে বের করে এবং তাকে adminConfig.referralBonus টাকা দেয়।
+        try {
+          const refCode = sessionStorage.getItem('mahim_pending_ref');
+          if (refCode) {
+            const referrer = users.find(u => u.uid === refCode && u.id !== id);
+            if (referrer) {
+              const bonus = (adminConfig.referralBonus !== undefined && adminConfig.referralBonus !== null) ? Number(adminConfig.referralBonus) : 1;
+              referrer.balance = Number(referrer.balance || 0) + bonus;
+              referrer.totalEarned = Number(referrer.totalEarned || 0) + bonus;
+              referrer.referralCount = Number(referrer.referralCount || 0) + 1;
+              user.referredBy = referrer.uid;
+            }
+            sessionStorage.removeItem('mahim_pending_ref');
+          }
+        } catch (e) {
+          console.warn('Referral bonus credit failed', e);
+        }
+
         users.push(user);
         saveUsersStore(users);
       }
@@ -1405,8 +1456,12 @@
       const user = findOrCreateUser(currentEmail());
       const referStatEl = document.getElementById('referStatAmount');
       if (referStatEl) referStatEl.textContent = String(user.referralCount || 0);
+      const botUrl = adminConfig.telegramBotAppUrl || 'https://t.me/Go_tasks_ern_bot/app';
       const referLinkEl = document.getElementById('referLink');
-      if (referLinkEl) referLinkEl.value = window.location.origin + window.location.pathname + '?ref=' + encodeURIComponent(user.email);
+      if (referLinkEl) referLinkEl.value = botUrl + '?startapp=' + encodeURIComponent(user.uid);
+      const bonus = (adminConfig.referralBonus !== undefined && adminConfig.referralBonus !== null) ? adminConfig.referralBonus : 1;
+      const bonusTextEl = document.getElementById('referBonusText');
+      if (bonusTextEl) bonusTextEl.textContent = `প্রতি ফ্রেন্ডে ${bonus} ${adminConfig.currency || 'TK'}!`;
     }
 
     function renderBalance() {
